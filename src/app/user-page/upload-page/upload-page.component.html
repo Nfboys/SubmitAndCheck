@@ -1,0 +1,172 @@
+<div nz-row nzGutter="96">
+  <div class="calendarWrapper" nz-col nzSpan="12">
+    <div class="calendarBorder">
+      <nz-calendar [nzFullscreen]="false" [(ngModel)]="selectedValue" (nzSelectChange)="onValueChange($event)"
+        (nzPanelChange)="onPanelChange($event)">
+      </nz-calendar>
+    </div>
+  </div>
+
+  <div nz-col nzSpan="12">
+    <h1>任务表</h1>
+    <nz-table #basicTable [nzData]="listOfData" [nzPageSize]="6">
+      <thead>
+        <tr>
+          <th>区域</th>
+          <th>状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td>{{ data.name }}</td>
+          <td>{{ data.state }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+<br>
+
+<div class="uploadMethod">
+  <h1>上传方式：上传excel文件</h1>
+  <a nz-button nzType="primary" download="疫情数据上传模板.xlsx" target="_blank" href="http://39.99.203.186:2000/上传模板.xlsx">
+    <i nz-icon nzType="download"></i>点击下载模板文件
+  </a>
+  <br><br>
+
+  <div nz-row nzGutter='32'>
+    <div nz-col nzSpan="4">
+      <!-- <nz-select [(ngModel)]="selectedValue" nzAllowClear nzPlaceHolder="选择省份"> -->
+      <nz-select nzAllowClear nzPlaceHolder="选择省份" style="width: 160px;">
+        <nz-option *ngFor="let place of listOfPlace" nzValue={{place}} nzLabel={{place}}></nz-option>
+      </nz-select>
+    </div>
+
+    <nz-upload [(nzFileList)]="fileList" [nzBeforeUpload]="beforeUpload" nz-col nzSpan="4">
+      <button nz-button><i nz-icon nzType="upload"></i><span>选择文件</span></button>
+    </nz-upload>
+    <button nz-button [nzType]="'primary'" [nzLoading]="uploading" (click)="handleUpload()"
+      [disabled]="fileList.length == 0" nz-col nzSpan="4">
+      {{ uploading ? '正在上传……' : '上传' }}
+    </button>
+  </div>
+</div>
+<div class="uploadMethod">
+  <h1>上传方式：填表格</h1>
+  <form nz-form [formGroup]="uploadByForm" class="login-form" (ngSubmit)="submitForm()">
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">选择地区</nz-form-label>
+      <nz-form-control [nzSpan]="6">
+        <nz-cascader [nzOptions]="nzOptions" [(ngModel)]="selectedCity" (ngModelChange)="onCityChange($event)"
+          [ngModelOptions]="{standalone: true}" nzChangeOnSelect></nz-cascader>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据起始时间</nz-form-label>
+      <nz-form-control [nzSpan]="9">
+          <nz-date-picker [(ngModel)]="startDate" (ngModelChange)="onDateChange($event)"
+          [ngModelOptions]="{standalone: true}" [nzShowTime]="true"></nz-date-picker>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据结束时间</nz-form-label>
+      <nz-form-control [nzSpan]="9">
+        <nz-date-picker [(ngModel)]="endDate" (ngModelChange)="onDateChange($event)"
+          [ngModelOptions]="{standalone: true}" [nzShowTime]="true"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+    <br><br>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据源</nz-form-label>
+      <nz-form-control [nzSpan]="9">
+        <input type="text" nz-input placeholder="示例：北京市卫健委" formControlName="dataSource"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据收集方式</nz-form-label>
+      <div nz-col [nzSpan]=3>
+        <nz-radio-group [(ngModel)]="collectMethod" [nzButtonStyle]="'solid'" [ngModelOptions]="{standalone: true}">
+          <label nz-radio-button nzValue="1">手动</label>
+          <label nz-radio-button nzValue="2">自动</label>
+        </nz-radio-group>
+      </div>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据收集人员</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="text" nz-input placeholder="" formControlName="dataCollector" nzErrorTip="请输入数据收集人员！"/>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据源链接</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <input nz-input placeholder="示例：http://wjw.beijing.gov.cn/xwzx_20031/wnxw/202002/t20200217_1643765.html" 
+        type="text" formControlName="dataSourceLink"/>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3">数据源文本</nz-form-label>
+      <nz-form-control [nzSpan]="12">
+        <textarea rows="8" nz-input formControlName="dataSourceText"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据源发布时间</nz-form-label>
+      <nz-form-control [nzSpan]="9">
+        <nz-date-picker [(ngModel)]="dataPublishTime" (ngModelChange)="onDateChange($event)"
+          [ngModelOptions]="{standalone: true}" [nzShowTime]="true"></nz-date-picker>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">数据收集时间</nz-form-label>
+      <nz-form-control [nzSpan]="9">
+        <nz-date-picker [(ngModel)]="dataCollectTime" (ngModelChange)="onDateChange($event)"
+          [ngModelOptions]="{standalone: true}" [nzShowTime]="true"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+    <br><br>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">新增确诊人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="newConfirm"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">新增疑似人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="newSuspect"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">新增治愈人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="newCured"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">新增死亡人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="newDied"/>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">累计确诊人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="totalConfirm"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">累计疑似人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="totalSuspect"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">累计治愈人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="totaCured"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3" [nzRequired]="true">累计死亡人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="totaDied"/>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="3">核减人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="cut"/>
+      </nz-form-control>
+      <nz-form-label [nzSpan]="3">累计核减人数</nz-form-label>
+      <nz-form-control [nzSpan]="3">
+        <input type="number" nz-input placeholder="" formControlName="totalCut"/>
+      </nz-form-control>
+      <nz-form-control [nzSpan]="2" [nzOffset]="4">
+        <button type="submit" nz-button nzType="primary" [disabled]="!uploadByForm.valid">提交</button>
+      </nz-form-control>
+    </nz-form-item>
+
+
+  </form>
+</div>

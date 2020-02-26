@@ -1,0 +1,30 @@
+<nz-layout>
+  <nz-header>
+    <!-- <div class="logo"></div> -->
+    <h1>疫情数据统计与检查系统</h1>
+  </nz-header>
+  <nz-layout>
+    <nz-sider nzWidth="200px" nzTheme="light">
+      <ul nz-menu nzMode="inline" class="sider-menu">
+        <li nz-submenu nzOpen nzIcon="play-square" nzTitle="功能">
+          <ul>
+            <li nz-menu-item [routerLink]="['./statistics', userId]"><i nz-icon nzType="pie-chart"
+                nzTheme="outline"></i>查看数据</li>
+            <li nz-menu-item nzSelected [routerLink]="['./upload', userId]"><i nz-icon nzType="to-top"
+                nzTheme="outline"></i>上传</li>
+            <li nz-menu-item [routerLink]="['./check', userId]"><i nz-icon nzType="safety-certificate"
+                nzTheme="outline"></i>审核</li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="个人信息设置" nzIcon="user">
+
+        </li>
+      </ul>
+    </nz-sider>
+    <nz-layout class="inner-layout">
+      <nz-content>
+        <router-outlet></router-outlet>
+      </nz-content>
+    </nz-layout>
+  </nz-layout>
+</nz-layout>
